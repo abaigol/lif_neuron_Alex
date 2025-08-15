@@ -27,10 +27,7 @@ wire loader_params_ready;
 // ENHANCED: Additional monitoring and control signals
 reg [7:0] system_cycles;
 reg [4:0] spike_count;
-wire system_active;
-
-// System activity monitoring
-assign system_active = |{chan_a, chan_b, spike_out};
+// REMOVED: wire system_active; // FIXED: Removed unused signal
 
 // Enhanced data loader instance
 lif_data_loader loader (

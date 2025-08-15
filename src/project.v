@@ -49,7 +49,7 @@ assign control_mode = ui_in[7:6];    // Control mode (2 bits) - pins 6,7
 
 // ENHANCED BIDIRECTIONAL INPUT MAPPING - More control signals
 assign load_mode = uio_in[0];        // Configuration mode - pin 0
-assign serial_data = uio_in[1];      // Serial parameter data - pin 1
+assign serial_data = uio_in[4];      // Serial parameter data - pin 1
 // uio_in[7:2] used as additional inputs below
 
 // MAXIMIZED OUTPUT MAPPING - All 8 output pins utilized
@@ -61,11 +61,11 @@ assign uio_oe[7:0] = 8'b11111100;   // Bits [7:2] = outputs, [1:0] = inputs
 
 // Enhanced bidirectional outputs - MAXIMIZED UTILIZATION
 assign uio_out[0] = 1'b0;            // Input pin - don't drive
-assign uio_out[1] = 1'b0;            // Input pin - don't drive
-assign uio_out[2] = params_ready;    // Parameter loading status
+assign uio_out[4] = 1'b0;            // Input pin - don't drive
+assign uio_out[5] = params_ready;    // Parameter loading status
 assign uio_out[3] = spike_out;       // Duplicate spike for monitoring
-assign uio_out[4] = |v_mem_out;      // Membrane activity indicator (any activity)
-assign uio_out[5] = &v_mem_out;      // Membrane saturation indicator (all bits high)
+assign uio_out[2] = |v_mem_out;      // Membrane activity indicator (any activity)
+assign uio_out[1] = &v_mem_out;      // Membrane saturation indicator (all bits high)
 assign uio_out[6] = system_initialized; // System ready indicator
 assign uio_out[7] = cycle_counter[7]; // MSB of cycle counter (slow heartbeat)
 
@@ -190,14 +190,14 @@ lif_neuron_system lif_core (
     .params_ready(params_ready)
 );
 
-// ADDITIONAL AREA CONSUMPTION - Unused input processing for completeness
+// ADDITIONAL AREA CONSUMPTION - Unused input processor for completeness - FIXED WIDTH
 reg [7:0] unused_input_processor;
 always @(posedge clk) begin
     if (reset) begin
         unused_input_processor <= 8'd0;
     end else begin
-        // Process additional bidirectional inputs to consume area
-        unused_input_processor <= uio_in[7:2] + pattern_counter + {4'd0, adaptive_factor} + usage_counter[3:0];
+        // FIXED: Process additional bidirectional inputs with proper width matching
+        unused_input_processor <= {2'b0, uio_in[7:2]} + {4'b0, pattern_counter} + {1'b0, adaptive_factor, 4'b0} + {4'b0, usage_counter[3:0]};
     end
 end
 
