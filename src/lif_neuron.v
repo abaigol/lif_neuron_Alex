@@ -86,7 +86,7 @@ wire [7:0] weighted_sum = {2'b0, contrib_a} + {2'b0, contrib_b} + {6'b0, pattern
 
 // COMPLETELY FIXED: Noise generation using LFSR - CORRECT SYNTAX AND WIDTH
 wire noise_bit = noise_lfsr[7] ^ noise_lfsr ^ noise_lfsr ^ noise_lfsr;
-wire [1:0] neural_noise = {noise_bit, noise_lfsr}; // FIXED: Correct concatenation width
+wire [1:0] neural_noise = {noise_bit, noise_lfsr};
 
 // Membrane potential output with enhanced precision
 assign v_mem_out = v_mem[7:1];
