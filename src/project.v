@@ -49,7 +49,7 @@ assign control_mode = ui_in[7:6];    // Control mode (2 bits) - pins 6,7
 
 // ENHANCED BIDIRECTIONAL INPUT MAPPING - More control signals
 assign load_mode = uio_in[0];        // Configuration mode - pin 0
-assign serial_data = uio_in[4];      // Serial parameter data - pin 1
+assign serial_data = uio_in[1];      // Serial parameter data - pin 1
 // uio_in[7:2] used as additional inputs below
 
 // MAXIMIZED OUTPUT MAPPING - All 8 output pins utilized
@@ -61,13 +61,13 @@ assign uio_oe[7:0] = 8'b11111100;   // Bits [7:2] = outputs, [1:0] = inputs
 
 // Enhanced bidirectional outputs - MAXIMIZED UTILIZATION
 assign uio_out[0] = 1'b0;            // Input pin - don't drive
-assign uio_out[4] = 1'b0;            // Input pin - don't drive
-assign uio_out[5] = params_ready;    // Parameter loading status
-assign uio_out[3] = spike_out;       // Duplicate spike for monitoring
-assign uio_out[2] = |v_mem_out;      // Membrane activity indicator (any activity)
-assign uio_out[1] = &v_mem_out;      // Membrane saturation indicator (all bits high)
-assign uio_out[6] = system_initialized; // System ready indicator
-assign uio_out[7] = cycle_counter[7]; // MSB of cycle counter (slow heartbeat)
+assign uio_out[1] = 1'b0;            // Input pin - don't drive
+assign uio_out = params_ready;    // Parameter loading status
+assign uio_out = spike_out;       // Duplicate spike for monitoring
+assign uio_out = |v_mem_out;      // Membrane activity indicator (any activity)
+assign uio_out = &v_mem_out;      // Membrane saturation indicator (all bits high)
+assign uio_out = system_initialized; // System ready indicator
+assign uio_out = cycle_counter; // MSB of cycle counter (slow heartbeat)
 
 // ENHANCED SYSTEM MONITORING - Additional logic to increase area usage
 always @(posedge clk) begin
@@ -204,8 +204,8 @@ end
 // Handle truly unused inputs (anti-optimization)
 wire _unused = &{
     unused_input_processor[7],  // Use MSB of our area-consuming logic
-    pattern_detector[7],        // Use MSB of pattern detector
-    load_cycles[3],            // Use MSB of load cycles
+    pattern_detector,        // Use MSB of pattern detector
+    load_cycles,            // Use MSB of load cycles
     1'b0
 };
 

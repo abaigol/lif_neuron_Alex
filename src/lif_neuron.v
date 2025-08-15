@@ -59,14 +59,18 @@ always @(*) begin
     adaptive_leak = leak_rate + (activity_tracker > homeostatic_target ? 3'd2 : 3'd0);
 end
 
-// ENHANCED: Complex weight computation with multiple factors - FIXED WIDTHS
+// ENHANCED: Complex weight computation with multiple factors - FIXED SYNTAX
 wire [2:0] base_weight_a = (weight_a > depress_a) ? (weight_a - depress_a) : 3'd0;
 wire [2:0] base_weight_b = (weight_b > depress_b) ? (weight_b - depress_b) : 3'd0;
 
-// Calcium-dependent weight scaling - FIXED: Proper bit widths
+// Calcium-dependent weight scaling - FIXED: Proper bit widths and valid syntax
 wire [3:0] calcium_scale = (calcium_trace > 8'd100) ? 4'd2 : 4'd4;
-wire [2:0] eff_weight_a = ((base_weight_a * calcium_scale) >> 2)[2:0]; // FIXED: Explicit truncation
-wire [2:0] eff_weight_b = ((base_weight_b * calcium_scale) >> 2)[2:0]; // FIXED: Explicit truncation
+
+// FIXED: Split multiplication and bit selection into separate steps (SYNTAX ERROR FIX)
+wire [6:0] mult_weight_a = base_weight_a * calcium_scale;  // 3-bit * 4-bit = max 7 bits
+wire [6:0] mult_weight_b = base_weight_b * calcium_scale;
+wire [2:0] eff_weight_a = mult_weight_a[4:2];  // Equivalent to (>>2) and keeping 3 bits
+wire [2:0] eff_weight_b = mult_weight_b[4:2];
 
 // ENHANCED: Complex input processing with pattern detection - FIXED WIDTHS
 wire [5:0] contrib_a = chan_a * eff_weight_a;
@@ -81,7 +85,7 @@ wire [1:0] pattern_boost = pattern_match ? 2'd2 : 2'd0;
 wire [7:0] weighted_sum = {2'b0, contrib_a} + {2'b0, contrib_b} + {6'b0, pattern_boost};
 
 // ENHANCED: Noise generation using LFSR - FIXED WIDTH
-wire noise_bit = noise_lfsr[7] ^ noise_lfsr[1] ^ noise_lfsr[2] ^ noise_lfsr[3];
+wire noise_bit = noise_lfsr[7] ^ noise_lfsr ^ noise_lfsr ^ noise_lfsr;
 wire [1:0] neural_noise = {noise_bit, noise_lfsr}; // FIXED: Correct concatenation
 
 // Membrane potential output with enhanced precision
