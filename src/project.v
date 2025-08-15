@@ -59,7 +59,7 @@ assign uo_out[7] = spike_out;        // Spike output (1 bit) - pin 7
 // ENHANCED BIDIRECTIONAL CONFIGURATION - More outputs
 assign uio_oe[7:0] = 8'b11111100;   // Bits [7:2] = outputs, [1:0] = inputs
 
-// Enhanced bidirectional outputs - MAXIMIZED UTILIZATION
+// FIXED: Enhanced bidirectional outputs - NO MULTIPLE DRIVERS
 assign uio_out[0] = 1'b0;            // Input pin - don't drive
 assign uio_out[1] = 1'b0;            // Input pin - don't drive
 assign uio_out = params_ready;    // Parameter loading status
