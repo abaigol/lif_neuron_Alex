@@ -4,15 +4,15 @@ module lif_neuron_system (
     input wire reset,
     input wire enable,
     
-    // Input channels - INCREASED PRECISION (6 bits total)
-    input wire [2:0] chan_a,  // 3-bit precision
-    input wire [2:0] chan_b,  // 3-bit precision
+    // ENHANCED Input channels
+    input wire [2:0] chan_a,  
+    input wire [2:0] chan_b,  
     
     // Configuration interface
     input wire load_mode,
     input wire serial_data,
     
-    // Outputs
+    // ENHANCED Outputs
     output wire spike_out,
     output wire [6:0] v_mem_out,
     output wire params_ready
@@ -24,7 +24,15 @@ wire [1:0] leak_config;
 wire [7:0] threshold_min, threshold_max;
 wire loader_params_ready;
 
-// Data loader instance (unchanged)
+// ENHANCED: Additional monitoring and control signals
+reg [7:0] system_cycles;
+reg [4:0] spike_count;
+wire system_active;
+
+// System activity monitoring
+assign system_active = |{chan_a, chan_b, spike_out};
+
+// Enhanced data loader instance
 lif_data_loader loader (
     .clk(clk),
     .reset(reset),
@@ -39,13 +47,13 @@ lif_data_loader loader (
     .params_ready(loader_params_ready)
 );
 
-// LIF neuron instance - UPDATED FOR 3-BIT CHANNELS
+// Enhanced LIF neuron instance
 lif_neuron neuron (
     .clk(clk),
     .reset(reset),
     .enable(enable),
-    .chan_a(chan_a),           // 3-bit input
-    .chan_b(chan_b),           // 3-bit input
+    .chan_a(chan_a),
+    .chan_b(chan_b),
     .weight_a(weight_a),
     .weight_b(weight_b),
     .leak_config(leak_config),
@@ -55,6 +63,20 @@ lif_neuron neuron (
     .spike_out(spike_out),
     .v_mem_out(v_mem_out)
 );
+
+// ENHANCED: System monitoring and statistics
+always @(posedge clk) begin
+    if (reset) begin
+        system_cycles <= 8'd0;
+        spike_count <= 5'd0;
+    end else if (enable) begin
+        system_cycles <= system_cycles + 1;
+        if (spike_out) begin
+            if (spike_count < 5'd31)
+                spike_count <= spike_count + 1;
+        end
+    end
+end
 
 assign params_ready = loader_params_ready;
 
