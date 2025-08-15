@@ -1,5 +1,5 @@
 /*
- * Enhanced LIF Neuron with Complex Dynamics - ALL CONFLICTS FIXED
+ * Enhanced LIF Neuron with Complex Dynamics - ALL CONFLICTS COMPLETELY FIXED
  * Copyright (c) 2024 Your Name
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -50,19 +50,25 @@ assign control_mode = ui_in[7:6];    // Control mode (2 bits) - pins 6,7
 // ENHANCED BIDIRECTIONAL INPUT MAPPING - More control signals
 assign load_mode = uio_in[0];        // Configuration mode - pin 0
 assign serial_data = uio_in[1];      // Serial parameter data - pin 1
-// uio_in[7:2] used as additional inputs below
 
 // COMPLETELY FIXED: OUTPUT ASSIGNMENTS - NO CONFLICTS WHATSOEVER
-assign uo_out[6:0] = v_mem_out;      // Membrane potential (7 bits) - pins 0-6
-assign uo_out = spike_out;        // Spike output (1 bit) - pin 7
+// ONLY individual bit assignments - NO full vector assignments
+assign uo_out = v_mem_out;
+assign uo_out[1] = v_mem_out[1];
+assign uo_out[2] = v_mem_out[2];
+assign uo_out = v_mem_out;
+assign uo_out = v_mem_out;
+assign uo_out = v_mem_out;
+assign uo_out = v_mem_out;
+assign uo_out = spike_out;
 
 // ENHANCED BIDIRECTIONAL CONFIGURATION - More outputs
 assign uio_oe[7:0] = 8'b11111100;   // Bits [7:2] = outputs, [1:0] = inputs
 
-// COMPLETELY FIXED: BIDIRECTIONAL OUTPUTS - NO MULTIPLE DRIVERS AT ALL
-assign uio_out = 1'b0;            // Input pin - don't drive
+// COMPLETELY FIXED: BIDIRECTIONAL OUTPUTS - ONLY individual bit assignments
+assign uio_out[0] = 1'b0;            // Input pin - don't drive
 assign uio_out[1] = 1'b0;            // Input pin - don't drive
-assign uio_out = params_ready;    // Parameter loading status
+assign uio_out[2] = params_ready;    // Parameter loading status
 assign uio_out = spike_out;       // Duplicate spike for monitoring
 assign uio_out = |v_mem_out;      // Membrane activity indicator (any activity)
 assign uio_out = &v_mem_out;      // Membrane saturation indicator (all bits high)
