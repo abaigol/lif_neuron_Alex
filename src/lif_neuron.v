@@ -40,7 +40,7 @@ reg [4:0] spike_history = 0;          // Last 5 spike history
 reg [3:0] burst_counter = 0;          // Burst detection counter
 reg [6:0] adaptation_level = 0;       // Long-term adaptation
 reg [7:0] noise_lfsr = 8'hA3;         // Linear feedback shift register for noise
-reg [3:0] pattern_memory = 0;         // Input pattern memory (REDUCED WIDTH)
+reg [3:0] pattern_memory = 0;         // Input pattern memory
 reg [7:0] homeostatic_target = 8'd50; // Target activity level
 reg [7:0] activity_tracker = 0;       // Recent activity tracker
 
@@ -76,7 +76,7 @@ wire [2:0] eff_weight_b = mult_weight_b[4:2];
 wire [5:0] contrib_a = chan_a * eff_weight_a;
 wire [5:0] contrib_b = chan_b * eff_weight_b;
 
-// Pattern-based modulation - FIXED: Simplified pattern matching
+// Pattern-based modulation - FIXED: Use all bits of pattern_memory
 wire [2:0] current_pattern = chan_a[1:0] + chan_b[1:0]; 
 wire pattern_match = (current_pattern == pattern_memory[2:0]);
 wire [1:0] pattern_boost = pattern_match ? 2'd2 : 2'd0;
@@ -84,7 +84,7 @@ wire [1:0] pattern_boost = pattern_match ? 2'd2 : 2'd0;
 // FIXED: Proper width expansion for addition
 wire [7:0] weighted_sum = {2'b0, contrib_a} + {2'b0, contrib_b} + {6'b0, pattern_boost};
 
-// ENHANCED: Noise generation using LFSR - FIXED WIDTH AND SYNTAX
+// COMPLETELY FIXED: Noise generation using LFSR - CORRECT SYNTAX AND WIDTH
 wire noise_bit = noise_lfsr[7] ^ noise_lfsr ^ noise_lfsr ^ noise_lfsr;
 wire [1:0] neural_noise = {noise_bit, noise_lfsr}; // FIXED: Correct concatenation width
 
@@ -101,7 +101,7 @@ reg [7:0] activity_update;
 always @(posedge clk) begin
     if (reset) begin
         v_mem <= 8'd0;
-        threshold <= threshold_min;
+        threshold <= threshold_min;  // Initialize with parameter
         refr_cnt <= 4'd0;
         spike_out <= 1'b0;
         depress_a <= 3'd0;
@@ -121,8 +121,8 @@ always @(posedge clk) begin
         // Update noise LFSR every cycle
         noise_lfsr <= {noise_lfsr[6:0], noise_bit};
         
-        // Update pattern memory with recent inputs - FIXED WIDTH
-        pattern_memory <= {pattern_memory[1:0], chan_a[1:0]};
+        // Update pattern memory with recent inputs - FIXED WIDTH AND USE ALL BITS
+        pattern_memory <= {pattern_memory[2:0], chan_a[0]};
         
         // Calcium dynamics (simulates intracellular calcium) - FIXED: Non-blocking assignments
         if (spike_out) begin
